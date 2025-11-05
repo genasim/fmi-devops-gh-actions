@@ -9,3 +9,11 @@ jobs:
         uses: actions/checkout@v4       
       - name: Build application
         run: ci/build-app.sh
+      - name: Upload artifact
+        run: actions/
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with: # Parameters for the action
+          name: code
+          path: .
+          include-hidden-files: true
