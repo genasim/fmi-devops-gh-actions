@@ -4,47 +4,27 @@ on:
     branches: ["main"]
 
 jobs:
-  Clone-down:
-    runs-on: ubuntu-latest
-    container: gradle:6-jdk11
-    steps:
-      - uses: actions/checkout@v4
-      - name: Upload Repo
-        uses: actions/upload-artifact@v4
-        with:
-          name: code
-          path: .
-          include-hidden-files: true
-
   Editorconfig-checker:
     runs-on: ubuntu-latest
-    needs: [Clone-down]
     steps:
-      - name: Download code
-        uses: actions/download-artifact@v4
-        with:
-          name: code
-          path: .
+      - uses: actions/checkout@v4
       - uses: editorconfig-checker/action-editorconfig-checker@main
       - run: editorconfig-checker
 
-  Markdown-cli:
+  Markdown-linter:
     runs-on: ubuntu-latest
-    needs: [Clone-down]
     steps:
-      - name: Download code
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: code
-          path: .
-      - name: Setup markdown-cli tool
-        run: npm install -g markdown-cli
-      - name: Run markdown-cli tool
-        run: markdown-cli **/*.md
+          node-version: "20"
+      - name: Run markdownlint
+        run: npx --yes markdownlint-cli@latest "**/*.md" --ignore "node_modules" --ignore "dist"
 
   Test:
     runs-on: ubuntu-latest
-    needs: [Editorconfig-checker, Markdown-cli]
+    needs: [Editorconfig-checker, Markdown-linter]
     container: gradle:6-jdk11
     steps:
       - name: Download code
@@ -57,7 +37,7 @@ jobs:
 
   Build:
     runs-on: ubuntu-latest
-    needs: [Editorconfig-checker, Markdown-cli]
+    needs: [Editorconfig-checker, Markdown-linter]
     container: gradle:6-jdk11
     steps:
       - name: Download code
@@ -75,8 +55,8 @@ jobs:
 
   # Linter:
   #   runs-on: ubuntu-latest
-  #   needs: [Editorconfig-checker, Markdown-cli]
-    
+  #   needs: [Editorconfig-checker, Markdown-linter]
+
   # Docker-image:
   #   runs-on: ubuntu-latest
   #   needs: [Build,Test]
