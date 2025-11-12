@@ -24,7 +24,7 @@ jobs:
 
   Build:
     runs-on: ubuntu-latest
-    container: gradle:6-jdk11
+    container: gradle:9-jdk24
     steps:
       - uses: actions/checkout@v4
       - name: Build with Gradle
@@ -52,6 +52,16 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/gradle-9-jdk24@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_AUTH }}
 
   Test:
     runs-on: ubuntu-latest
